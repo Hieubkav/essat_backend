@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Listeners\ConvertImageToWebp;
 use App\Models\RichEditorMedia;
 use App\Observers\RichEditorMediaObserver;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 
@@ -25,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Media::observe(MediaObserver::class);
         RichEditorMedia::observe(RichEditorMediaObserver::class);
+
+        Event::listen(MediaHasBeenAddedEvent::class, ConvertImageToWebp::class);
     }
 }

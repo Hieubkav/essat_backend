@@ -13,4 +13,16 @@ class CreateMediaLibrary extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function afterCreate(): void
+    {
+        if (empty($this->record->name)) {
+            $firstMedia = $this->record->getFirstMedia('library');
+            if ($firstMedia) {
+                $this->record->update([
+                    'name' => pathinfo($firstMedia->file_name, PATHINFO_FILENAME),
+                ]);
+            }
+        }
+    }
 }

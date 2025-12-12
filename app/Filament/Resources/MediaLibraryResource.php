@@ -50,7 +50,7 @@ class MediaLibraryResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Tên file')
-                            ->required()
+                            ->placeholder('Tự động sinh từ tên file upload')
                             ->maxLength(255),
 
                         Forms\Components\SpatieMediaLibraryFileUpload::make('library')
@@ -90,17 +90,6 @@ class MediaLibraryResource extends Resource
                     ->label('Tên')
                     ->searchable()
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('media_count')
-                    ->label('Số file')
-                    ->counts('media')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Cập nhật')

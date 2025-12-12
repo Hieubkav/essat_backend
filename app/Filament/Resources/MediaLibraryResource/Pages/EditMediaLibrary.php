@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\MediaLibraryResource\Pages;
 
+use App\Filament\Pages\BaseEditRecord;
 use App\Filament\Resources\MediaLibraryResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
 
-class EditMediaLibrary extends EditRecord
+class EditMediaLibrary extends BaseEditRecord
 {
     protected static string $resource = MediaLibraryResource::class;
 
@@ -18,8 +18,15 @@ class EditMediaLibrary extends EditRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
+    protected function afterSave(): void
     {
-        return $this->getResource()::getUrl('index');
+        if (empty($this->record->name)) {
+            $firstMedia = $this->record->getFirstMedia('library');
+            if ($firstMedia) {
+                $this->record->update([
+                    'name' => pathinfo($firstMedia->file_name, PATHINFO_FILENAME),
+                ]);
+            }
+        }
     }
 }
