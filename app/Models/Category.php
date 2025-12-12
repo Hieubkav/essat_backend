@@ -2,20 +2,13 @@
 
 namespace App\Models;
 
-use App\Casts\LexicalToHtmlCast;
-use App\Models\Concerns\HasRichEditorMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Post extends Model
+class Category extends Model
 {
     use HasFactory;
-    use HasRichEditorMedia;
-
-    protected array $richEditorFields = ['content'];
-
-    protected string $richEditorContentDirectory = 'posts';
 
     /**
      * The attributes that are mass assignable.
@@ -23,12 +16,10 @@ class Post extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'category_id',
-        'title',
+        'name',
         'slug',
-        'content',
+        'description',
         'active',
-        'thumbnail',
         'order',
     ];
 
@@ -42,15 +33,14 @@ class Post extends Model
         return [
             'active' => 'boolean',
             'order' => 'integer',
-            'content' => LexicalToHtmlCast::class,
         ];
     }
 
     /**
-     * Get the category that owns the post.
+     * Get the posts for the category.
      */
-    public function category(): BelongsTo
+    public function posts(): HasMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->hasMany(Post::class);
     }
 }

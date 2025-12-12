@@ -7,6 +7,7 @@ use App\Models\Post;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Malzariey\FilamentLexicalEditor\LexicalEditor;
 use Filament\Forms\Components\Toggle;
@@ -69,6 +70,13 @@ class PostResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->hidden(),
+
+                        Select::make('category_id')
+                            ->label('Chuyên mục')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Chọn chuyên mục'),
 
                         Toggle::make('active')
                             ->label('Hiển thị')
@@ -180,6 +188,12 @@ class PostResource extends Resource
                     ->sortable()
                     ->limit(50),
 
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Chuyên mục')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('Chưa phân loại'),
+
                 Tables\Columns\TextColumn::make('slug')
                     ->label('Đường dẫn')
                     ->searchable()
@@ -208,6 +222,12 @@ class PostResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Chuyên mục')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload(),
+
                 Tables\Filters\TernaryFilter::make('active')
                     ->label('Trạng thái')
                     ->placeholder('Tất cả')
