@@ -58,6 +58,7 @@ class ProductResource extends Resource
             ->columns(1)
             ->components([
                 Section::make('Thông tin sản phẩm')
+                    ->columns(2)
                     ->schema([
                         TextInput::make('name')
                             ->label('Tên sản phẩm')
@@ -81,26 +82,21 @@ class ProductResource extends Resource
                             ->preload()
                             ->placeholder('Chọn danh mục'),
 
-                        Textarea::make('description')
-                            ->label('Mô tả ngắn')
-                            ->rows(2)
-                            ->maxLength(500),
-
                         TextInput::make('price')
                             ->label('Giá')
                             ->numeric()
                             ->prefix('VNĐ')
                             ->minValue(0),
 
-                        TextInput::make('order')
-                            ->label('Thứ tự')
-                            ->numeric()
-                            ->default(0)
-                            ->minValue(0),
-
                         Toggle::make('active')
                             ->label('Hiển thị')
                             ->default(true),
+
+                        Textarea::make('description')
+                            ->label('Mô tả ngắn')
+                            ->rows(2)
+                            ->maxLength(500)
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Nội dung chi tiết')
@@ -183,14 +179,6 @@ class ProductResource extends Resource
                     ->disk('public')
                     ->circular(),
 
-                SpatieMediaLibraryImageColumn::make('images')
-                    ->label('Ảnh SP')
-                    ->collection('images')
-                    ->disk('public')
-                    ->circular()
-                    ->stacked()
-                    ->limit(3),
-
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên sản phẩm')
                     ->searchable()
@@ -218,16 +206,6 @@ class ProductResource extends Resource
                     ->boolean()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('order')
-                    ->label('Thứ tự')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(),
-
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Cập nhật')
                     ->dateTime('d/m/Y H:i')
@@ -235,6 +213,7 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
+            ->reorderable('order')
             ->filters([
                 Tables\Filters\SelectFilter::make('categories')
                     ->label('Danh mục')

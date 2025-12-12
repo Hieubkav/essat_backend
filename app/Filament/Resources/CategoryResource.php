@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Actions;
 use Filament\Forms\Components\Textarea;
@@ -65,17 +66,6 @@ class CategoryResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->hidden(),
 
-                        Textarea::make('description')
-                            ->label('Mô tả')
-                            ->rows(3)
-                            ->maxLength(500),
-
-                        TextInput::make('order')
-                            ->label('Thứ tự')
-                            ->numeric()
-                            ->default(0)
-                            ->minValue(0),
-
                         Toggle::make('active')
                             ->label('Hiển thị')
                             ->default(true),
@@ -107,10 +97,6 @@ class CategoryResource extends Resource
                     ->boolean()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('order')
-                    ->label('Thứ tự')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime('d/m/Y H:i')
@@ -139,7 +125,9 @@ class CategoryResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RelationManagers\PostsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

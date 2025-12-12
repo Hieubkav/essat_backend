@@ -204,16 +204,6 @@ class PostResource extends Resource
                     ->boolean()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('order')
-                    ->label('Thứ tự')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(),
-
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Cập nhật')
                     ->dateTime('d/m/Y H:i')
@@ -221,6 +211,7 @@ class PostResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
+            ->reorderable('order')
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Chuyên mục')
