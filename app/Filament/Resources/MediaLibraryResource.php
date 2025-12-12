@@ -23,7 +23,7 @@ class MediaLibraryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Nội dung';
+        return 'Hệ thống';
     }
 
     public static function getModelLabel(): string

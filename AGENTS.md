@@ -97,3 +97,14 @@ Xem `docs/README.md` để tiếp cận tài liệu chi tiết:
 - `docs/guides/GETTING_STARTED.md` - Hướng dẫn bắt đầu
 - `docs/guides/CREATING_FEATURES.md` - Tạo feature
 - `docs/guides/BEST_PRACTICES.md` - Best practices
+
+
+## Filament
+- EditRecord pages phải extend `App\Filament\Pages\BaseEditRecord` để giữ nguyên trang edit sau khi lưu
+
+## File Upload
+- **Chuyển đổi ảnh sang WebP**: Ảnh upload (JPEG, PNG, GIF) phải tự động chuyển sang WebP với quality 80 bằng `Spatie\Image\Image`
+- **Observer xóa file**: Mọi Model có trường lưu đường dẫn file (ảnh, video, PDF...) phải có Observer để:
+  - `updating`: Xóa file cũ khi đường dẫn thay đổi
+  - `deleted`: Xóa tất cả file liên quan khi xóa record
+- Sử dụng `Storage::disk('public')->delete($path)` để xóa file

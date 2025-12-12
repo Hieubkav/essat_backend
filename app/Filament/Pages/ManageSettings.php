@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -14,6 +15,10 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Spatie\Image\Enums\ImageDriver;
+use Spatie\Image\Image;
 
 class ManageSettings extends Page implements HasForms
 {
@@ -113,6 +118,63 @@ class ManageSettings extends Page implements HasForms
                             ->maxLength(500)
                             ->placeholder('Mô tả ngắn cho công cụ tìm kiếm'),
                     ]),
+
+                Section::make('Hình ảnh')
+                    ->schema([
+                        FileUpload::make('logo')
+                            ->label('Logo (OG Image)')
+                            ->helperText('Dùng làm og:image khi chia sẻ link')
+                            ->image()
+                            ->directory('settings')
+                            ->disk('public')
+                            ->imageEditor()
+                            ->acceptedFileTypes([
+                                'image/jpeg',
+                                'image/png',
+                                'image/gif',
+                                'image/webp',
+                            ])
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
+                                return $this->convertToWebp($file, 'logo');
+                            }),
+
+                        FileUpload::make('favicon')
+                            ->label('Favicon')
+                            ->helperText('Icon hiển thị trên tab trình duyệt')
+                            ->image()
+                            ->directory('settings')
+                            ->disk('public')
+                            ->imageEditor()
+                            ->acceptedFileTypes([
+                                'image/jpeg',
+                                'image/png',
+                                'image/gif',
+                                'image/webp',
+                                'image/x-icon',
+                                'image/vnd.microsoft.icon',
+                            ])
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
+                                return $this->convertToWebp($file, 'favicon');
+                            }),
+
+                        FileUpload::make('placeholder')
+                            ->label('Placeholder')
+                            ->helperText('Ảnh mặc định khi không có ảnh')
+                            ->image()
+                            ->directory('settings')
+                            ->disk('public')
+                            ->imageEditor()
+                            ->acceptedFileTypes([
+                                'image/jpeg',
+                                'image/png',
+                                'image/gif',
+                                'image/webp',
+                            ])
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) {
+                                return $this->convertToWebp($file, 'placeholder');
+                            }),
+                    ])
+                    ->columns(3),
             ])
             ->statePath('data');
     }
@@ -141,5 +203,38 @@ class ManageSettings extends Page implements HasForms
                 ->label('Lưu thay đổi')
                 ->submit('save'),
         ];
+    }
+
+    protected function convertToWebp(TemporaryUploadedFile $file, string $prefix): string
+    {
+        $convertibleMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        $mimeType = $file->getMimeType();
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $newFileName = $prefix.'-'.Str::slug($originalName).'-'.time();
+
+        if (! in_array($mimeType, $convertibleMimeTypes)) {
+            $extension = $file->getClientOriginalExtension();
+            $path = 'settings/'.$newFileName.'.'.$extension;
+            $file->storeAs('settings', $newFileName.'.'.$extension, 'public');
+
+            return $path;
+        }
+
+        $tempPath = $file->getRealPath();
+        $webpFileName = $newFileName.'.webp';
+        $webpPath = 'settings/'.$webpFileName;
+        $fullWebpPath = storage_path('app/public/'.$webpPath);
+
+        if (! is_dir(dirname($fullWebpPath))) {
+            mkdir(dirname($fullWebpPath), 0755, true);
+        }
+
+        Image::useImageDriver(ImageDriver::Gd)
+            ->load($tempPath)
+            ->quality(80)
+            ->save($fullWebpPath);
+
+        return $webpPath;
     }
 }
