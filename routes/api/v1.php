@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\HomeComponentController;
+use App\Http\Controllers\Api\V1\MenuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,9 @@ Route::middleware('api')->group(function () {
     // Public home components
     Route::get('/home-components', [HomeComponentController::class, 'index'])->name('home-components.index');
     Route::get('/home-components/{type}', [HomeComponentController::class, 'show'])->name('home-components.show');
+
+    // Public menus
+    Route::get('/menus', [MenuController::class, 'index'])->name('menus.index');
 
     // Public auth routes
     Route::prefix('auth')->group(function () {
