@@ -76,12 +76,15 @@ class ManageSettings extends Page implements HasForms
                             ->schema([
                                 ColorPicker::make('primary_color')
                                     ->label('Màu chủ đạo')
-                                    ->default('#000000'),
+                                    ->default('#000000')
+                                    ->hidden(),
 
                                 ColorPicker::make('secondary_color')
                                     ->label('Màu phụ')
-                                    ->default('#ffffff'),
-                            ]),
+                                    ->default('#ffffff')
+                                    ->hidden(),
+                            ])
+                            ->hidden(),
                     ]),
 
                 Section::make('Liên hệ')
