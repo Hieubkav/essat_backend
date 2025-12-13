@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Support\Facades\Storage;
+
 class SettingResource extends BaseResource
 {
     /**
@@ -18,6 +20,9 @@ class SettingResource extends BaseResource
             'phone' => $this->phone,
             'address' => $this->address,
             'email' => $this->email,
+            'logo' => $this->logo ? Storage::disk('public')->url($this->logo) : null,
+            'favicon' => $this->favicon ? Storage::disk('public')->url($this->favicon) : null,
+            'placeholder' => $this->placeholder ? Storage::disk('public')->url($this->placeholder) : null,
             'updated_at' => $this->updated_at,
         ];
     }
