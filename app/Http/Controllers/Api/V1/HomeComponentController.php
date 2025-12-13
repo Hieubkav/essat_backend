@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\HomeComponentType;
 use App\Http\Controllers\Controller;
 use App\Models\HomeComponent;
+use App\Models\Post;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,7 +21,7 @@ class HomeComponentController extends Controller
                 ->get()
                 ->map(fn ($item) => [
                     'type' => $item->type,
-                    'config' => $this->transformConfig($item->config ?? []),
+                    'config' => $this->transformConfig($item->type, $item->config ?? []),
                 ]);
         });
 
@@ -48,14 +51,73 @@ class HomeComponentController extends Controller
             'success' => true,
             'data' => [
                 'type' => $component->type,
-                'config' => $this->transformConfig($component->config ?? []),
+                'config' => $this->transformConfig($component->type, $component->config ?? []),
             ],
         ]);
     }
 
-    protected function transformConfig(array $config): array
+    protected function transformConfig(string $type, array $config): array
     {
-        return $this->transformImagePaths($config);
+        $config = $this->transformImagePaths($config);
+
+        if ($type === HomeComponentType::FeaturedProducts->value) {
+            $config = $this->transformFeaturedProducts($config);
+        }
+
+        if ($type === HomeComponentType::News->value) {
+            $config = $this->transformNews($config);
+        }
+
+        return $config;
+    }
+
+    protected function transformFeaturedProducts(array $config): array
+    {
+        $displayMode = $config['display_mode'] ?? 'manual';
+
+        if ($displayMode === 'latest') {
+            $limit = (int) ($config['limit'] ?? 8);
+            $products = Product::query()
+                ->where('active', true)
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get()
+                ->map(fn (Product $product) => [
+                    'image' => $product->thumbnail ? asset('storage/' . $product->thumbnail) : null,
+                    'name' => $product->name,
+                    'price' => $product->price ? number_format($product->price, 0, ',', '.') . ' đ' : 'Liên hệ',
+                    'link' => '/products/' . $product->slug,
+                ])
+                ->toArray();
+
+            $config['products'] = $products;
+        }
+
+        return $config;
+    }
+
+    protected function transformNews(array $config): array
+    {
+        $displayMode = $config['display_mode'] ?? 'manual';
+
+        if ($displayMode === 'latest') {
+            $limit = (int) ($config['limit'] ?? 6);
+            $posts = Post::query()
+                ->where('active', true)
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get()
+                ->map(fn (Post $post) => [
+                    'image' => $post->thumbnail ? asset('storage/' . $post->thumbnail) : null,
+                    'title' => $post->title,
+                    'link' => '/news/' . $post->slug,
+                ])
+                ->toArray();
+
+            $config['posts'] = $posts;
+        }
+
+        return $config;
     }
 
     protected function transformImagePaths(array $data): array
@@ -66,7 +128,10 @@ class HomeComponentController extends Controller
             if (is_array($value)) {
                 $data[$key] = $this->transformImagePaths($value);
             } elseif (in_array($key, $imageFields) && is_string($value) && !empty($value)) {
-                $data[$key] = asset('storage/' . $value);
+                // Chỉ transform nếu là local path (không phải URL đầy đủ)
+                if (!str_starts_with($value, 'http://') && !str_starts_with($value, 'https://')) {
+                    $data[$key] = asset('storage/' . $value);
+                }
             }
         }
 

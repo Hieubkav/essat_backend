@@ -69,8 +69,8 @@ class HomeComponentSeeder extends Seeder
             'active' => true,
             'config' => [
                 'badge' => 'Về chúng tôi',
-                'title' => 'Đối tác công nghệ Chiến lược & Toàn diện',
-                'subtitle' => '',
+                'title' => 'Đối tác công nghệ',
+                'subtitle' => 'Chiến lược & Toàn diện',
                 'description' => 'ESAT không chỉ phân phối thiết bị mà còn cung cấp hệ sinh thái giải pháp công nghệ, giúp doanh nghiệp tối ưu vận hành và bứt phá.',
                 'quote' => 'Chất lượng là nền tảng, nhưng sự hài lòng của khách hàng mới là đích đến cuối cùng.',
                 'image' => '',

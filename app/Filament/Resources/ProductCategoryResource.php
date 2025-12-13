@@ -64,6 +64,9 @@ class ProductCategoryResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'Danh mục với tên này đã tồn tại. Vui lòng chọn tên khác.',
+                            ])
                             ->hidden(),
 
                         Toggle::make('active')

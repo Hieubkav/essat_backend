@@ -268,15 +268,17 @@ class HomeComponentResource extends Resource
                 ->maxLength(50),
 
             TextInput::make('config.title')
-                ->label('Tiêu đề chính')
-                ->placeholder('Đối tác công nghệ chiến lược')
+                ->label('Tiêu đề chính (chữ đen)')
+                ->placeholder('Đối tác công nghệ')
                 ->required()
-                ->maxLength(100),
+                ->maxLength(100)
+                ->helperText('Phần tiêu đề hiển thị màu đen'),
 
             TextInput::make('config.subtitle')
-                ->label('Tiêu đề phụ')
-                ->placeholder('Giải pháp toàn diện cho doanh nghiệp')
-                ->maxLength(150),
+                ->label('Tiêu đề phụ (chữ màu)')
+                ->placeholder('Chiến lược & Toàn diện')
+                ->maxLength(150)
+                ->helperText('Phần tiêu đề hiển thị màu chủ đạo (primary)'),
 
             RichEditor::make('config.description')
                 ->label('Mô tả chi tiết')
@@ -573,9 +575,6 @@ class HomeComponentResource extends Resource
                         ->defaultItems(4),
                 ]),
 
-            TextInput::make('config.copyright')
-                ->label('Text bản quyền')
-                ->placeholder('© 2024 Công ty ABC. Bảo lưu mọi quyền.'),
         ];
     }
 }

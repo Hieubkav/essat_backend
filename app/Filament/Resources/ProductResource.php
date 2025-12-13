@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -103,7 +104,44 @@ class ProductResource extends Resource
                     ->schema([
                         LexicalEditor::make('content')
                             ->label('Nội dung')
-                            ->helperText('Ảnh paste/upload sẽ tự lưu ra file, không lưu base64 vào DB.'),
+                            ->helperText('Ảnh paste/upload sẽ tự lưu ra file, không lưu base64 vào DB.')
+                            ->hintActions([
+                                Action::make('generateContent')
+                                    ->label('Tạo nội dung AI')
+                                    ->icon('heroicon-o-sparkles')
+                                    ->color('success')
+                                    ->action(function ($get, $livewire) {
+                                        $name = $get('name') ?: 'sản phẩm bạn muốn';
+                                        $prompt = "Viết ngay mô tả sản phẩm tiếng Việt, tên: \"{$name}\".\n\nYêu cầu:\n- Mở đầu: thu hút, nêu điểm nổi bật\n- Thân bài: 3-5 phần với heading rõ ràng (tính năng, ưu điểm, thông số)\n- Kết bài: tóm tắt + kêu gọi mua hàng\n- Tối ưu SEO: từ khóa tự nhiên, dễ đọc\n- Độ dài: 300-500 từ\n\nTrả lời trực tiếp nội dung mô tả sản phẩm, không hỏi lại.";
+                                        $url = 'https://chatgpt.com/?model=auto&q=' . urlencode($prompt);
+                                        
+                                        $livewire->js("window.open('{$url}', '_blank')");
+                                    }),
+                                Action::make('improveContent')
+                                    ->label('Nâng cấp nội dung')
+                                    ->icon('heroicon-o-arrow-trending-up')
+                                    ->color('warning')
+                                    ->action(function ($get, $state, $livewire) {
+                                        $name = $get('name') ?: 'sản phẩm bạn muốn';
+                                        $content = $state ?? '';
+                                        
+                                        // Strip HTML và giới hạn độ dài
+                                        $plainContent = strip_tags($content);
+                                        $plainContent = preg_replace('/\s+/', ' ', $plainContent);
+                                        $plainContent = trim($plainContent);
+                                        $plainContent = Str::limit($plainContent, 1500, '...');
+                                        
+                                        if (empty($plainContent)) {
+                                            $prompt = "Viết ngay mô tả sản phẩm tiếng Việt, tên: \"{$name}\".\n\nYêu cầu:\n- Mở đầu: thu hút, nêu điểm nổi bật\n- Thân bài: 3-5 phần với heading rõ ràng (tính năng, ưu điểm, thông số)\n- Kết bài: tóm tắt + kêu gọi mua hàng\n- Tối ưu SEO: từ khóa tự nhiên, dễ đọc\n- Độ dài: 300-500 từ\n\nTrả lời trực tiếp nội dung mô tả sản phẩm, không hỏi lại.";
+                                        } else {
+                                            $prompt = "Nâng cấp mô tả sản phẩm tiếng Việt sau:\n\nTên sản phẩm: \"{$name}\"\n\nNội dung hiện tại:\n{$plainContent}\n\nYêu cầu:\n- Giữ ý chính, bổ sung chi tiết/ví dụ\n- Cải thiện SEO: từ khóa, heading logic\n- Tăng tính thuyết phục, dễ đọc\n- Thêm kêu gọi mua hàng cuối bài\n\nTrả lời trực tiếp mô tả sản phẩm đã nâng cấp, không hỏi lại.";
+                                        }
+                                        
+                                        $url = 'https://chatgpt.com/?model=auto&q=' . urlencode($prompt);
+                                        
+                                        $livewire->js("window.open('{$url}', '_blank')");
+                                    }),
+                            ]),
 
                         FileUpload::make('thumbnail')
                             ->label('Ảnh đại diện')
