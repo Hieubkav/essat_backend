@@ -2,16 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Models\Post;
+use App\Models\Product;
 
-/**
- * Post Repository
- */
-class PostRepository extends BaseRepository implements PostRepositoryInterface
+class ProductRepository extends BaseRepository implements ProductRepositoryInterface
 {
     public function __construct()
     {
-        $this->model = new Post();
+        $this->model = new Product();
     }
 
     public function getActive(int $perPage = 15, ?int $categoryId = null)
@@ -21,13 +18,15 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->orderBy('order');
 
         if ($categoryId) {
-            $query->where('category_id', $categoryId);
+            $query->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('product_categories.id', $categoryId);
+            });
         }
 
         return $query->paginate($perPage);
     }
 
-    public function findActiveBySlug(string $slug): ?Post
+    public function findActiveBySlug(string $slug): ?Product
     {
         return $this->model
             ->where('slug', $slug)
@@ -35,11 +34,11 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->first();
     }
 
-    public function getLatest(int $limit = 6)
+    public function getFeatured(int $limit = 8)
     {
         return $this->model
             ->where('active', true)
-            ->orderByDesc('created_at')
+            ->orderBy('order')
             ->limit($limit)
             ->get();
     }

@@ -24,6 +24,30 @@ class PostService extends BaseService
     }
 
     /**
+     * Get active posts (public API).
+     */
+    public function listActive(int $perPage = 15, ?int $categoryId = null)
+    {
+        return $this->posts->getActive($perPage, $categoryId);
+    }
+
+    /**
+     * Find post by slug (public API).
+     */
+    public function findBySlug(string $slug): ?Post
+    {
+        return $this->posts->findActiveBySlug($slug);
+    }
+
+    /**
+     * Get latest posts.
+     */
+    public function getLatest(int $limit = 6)
+    {
+        return $this->posts->getLatest($limit);
+    }
+
+    /**
      * Create a new post.
      */
     public function create(array $data): Post

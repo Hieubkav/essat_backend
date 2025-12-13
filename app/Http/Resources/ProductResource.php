@@ -2,23 +2,21 @@
 
 namespace App\Http\Resources;
 
-class PostResource extends BaseResource
+class ProductResource extends BaseResource
 {
-    /**
-     * Transform the resource into an array.
-     */
     public function toArray($request): array
     {
         return [
             'id' => $this->id,
-            'category_id' => $this->category_id,
-            'title' => $this->title,
+            'name' => $this->name,
             'slug' => $this->slug,
+            'description' => $this->description,
             'content' => $this->content,
-            'active' => $this->active,
             'thumbnail' => $this->thumbnail,
+            'price' => $this->price,
+            'active' => $this->active,
             'order' => $this->order,
-            'category' => new CategoryResource($this->whenLoaded('category')),
+            'categories' => ProductCategoryResource::collection($this->whenLoaded('categories')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

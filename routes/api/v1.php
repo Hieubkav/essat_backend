@@ -4,11 +4,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\PostController;
+use App\Http\Controllers\Api\V1\PublicPostController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\HomeComponentController;
 use App\Http\Controllers\Api\V1\MenuController;
 use App\Http\Controllers\Api\V1\HomeController;
+use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\ProductCategoryController;
+use App\Http\Controllers\Api\V1\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +37,24 @@ Route::middleware('api')->group(function () {
     // Public menus
     Route::get('/menus', [MenuController::class, 'index'])->name('menus.index');
 
+    // Public products
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/featured', [ProductController::class, 'featured'])->name('products.featured');
+    Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+    // Public product categories
+    Route::get('/product-categories', [ProductCategoryController::class, 'index'])->name('product-categories.index');
+    Route::get('/product-categories/{slug}', [ProductCategoryController::class, 'show'])->name('product-categories.show');
+
+    // Public posts
+    Route::get('/posts', [PublicPostController::class, 'index'])->name('public-posts.index');
+    Route::get('/posts/latest', [PublicPostController::class, 'latest'])->name('public-posts.latest');
+    Route::get('/posts/{slug}', [PublicPostController::class, 'show'])->name('public-posts.show');
+
+    // Public categories (post categories)
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
+
     // Public auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
@@ -48,7 +70,7 @@ Route::middleware('api')->group(function () {
         });
 
         // Admin only routes
-        Route::middleware('admin')->group(function () {
+        Route::middleware('admin')->prefix('admin')->group(function () {
             Route::apiResource('users', UserController::class);
             Route::apiResource('posts', PostController::class);
             Route::apiResource('media', MediaController::class);
