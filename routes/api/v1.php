@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\HomeComponentController;
 use App\Http\Controllers\Api\V1\MenuController;
+use App\Http\Controllers\Api\V1\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,9 @@ use App\Http\Controllers\Api\V1\MenuController;
 */
 
 Route::middleware('api')->group(function () {
+    // Single endpoint cho trang chủ - giảm từ 9 requests xuống 1
+    Route::get('/home', [HomeController::class, 'index'])->name('home.index');
+
     // Public settings
     Route::get('/settings', [SettingController::class, 'show'])->name('settings.show');
 
