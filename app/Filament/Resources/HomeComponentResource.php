@@ -31,7 +31,7 @@ class HomeComponentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Trang chủ';
+        return 'Hệ thống';
     }
 
     public static function getModelLabel(): string

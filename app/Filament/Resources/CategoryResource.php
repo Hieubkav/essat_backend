@@ -27,7 +27,7 @@ class CategoryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Nội dung';
+        return null;
     }
 
     public static function getModelLabel(): string
@@ -42,7 +42,7 @@ class CategoryResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 0;
+        return 1;
     }
 
     public static function form(Schema $schema): Schema

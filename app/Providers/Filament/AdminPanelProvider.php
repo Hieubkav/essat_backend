@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Setting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Admin Panel')
+            ->brandName(fn () => Setting::where('singleton', Setting::SINGLETON_KEY)->value('site_name') ?? 'Admin Panel')
             ->colors([
                 'primary' => Color::Indigo,
             ])

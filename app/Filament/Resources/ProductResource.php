@@ -34,7 +34,7 @@ class ProductResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Sản phẩm';
+        return null;
     }
 
     public static function getModelLabel(): string
@@ -49,7 +49,7 @@ class ProductResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 4;
     }
 
     public static function form(Schema $schema): Schema
