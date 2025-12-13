@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(AdminUserSeeder::class);
         $this->call(MediaSeeder::class);
+        $this->call(HomeComponentSeeder::class);
     }
 }
