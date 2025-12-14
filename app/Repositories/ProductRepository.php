@@ -14,6 +14,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     public function getActive(int $perPage = 15, ?int $categoryId = null)
     {
         $query = $this->model
+            ->with('categories')
             ->where('active', true)
             ->orderBy('order');
 
@@ -37,6 +38,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     public function getFeatured(int $limit = 8)
     {
         return $this->model
+            ->with('categories')
             ->where('active', true)
             ->orderBy('order')
             ->limit($limit)
