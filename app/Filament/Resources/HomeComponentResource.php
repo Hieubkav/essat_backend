@@ -335,9 +335,45 @@ class HomeComponentResource extends Resource
                         ->required()
                         ->maxLength(50),
 
+                    Select::make('link_type')
+                        ->label('Loại liên kết')
+                        ->options([
+                            'category' => 'Chọn danh mục có sẵn',
+                            'custom' => 'Tự nhập link',
+                        ])
+                        ->default('category')
+                        ->live()
+                        ->required()
+                        ->helperText('Chọn danh mục sẽ tự động tạo link: /san-pham?category=slug'),
+
+                    Select::make('category_id')
+                        ->label('Chọn danh mục')
+                        ->options(fn () => \App\Models\ProductCategory::query()
+                            ->where('active', true)
+                            ->orderBy('order')
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
+                        ->searchable()
+                        ->visible(fn (Get $get) => $get('link_type') === 'category')
+                        ->required(fn (Get $get) => $get('link_type') === 'category')
+                        ->reactive()
+                        ->afterStateUpdated(function ($state, $set) {
+                            if ($state) {
+                                $category = \App\Models\ProductCategory::find($state);
+                                if ($category) {
+                                    $set('link', '/san-pham?category=' . $category->slug);
+                                }
+                            }
+                        })
+                        ->helperText('Link sẽ tự động được tạo khi chọn danh mục'),
+
                     TextInput::make('link')
-                        ->label('Link đến')
-                        ->placeholder('/products/category-slug'),
+                        ->label('Link tùy chỉnh')
+                        ->placeholder('/san-pham?category=custom-slug')
+                        ->visible(fn (Get $get) => $get('link_type') === 'custom')
+                        ->required(fn (Get $get) => $get('link_type') === 'custom')
+                        ->helperText('Sử dụng đường dẫn tương đối (bắt đầu bằng /)'),
                 ])
                 ->columns(2)
                 ->reorderable()

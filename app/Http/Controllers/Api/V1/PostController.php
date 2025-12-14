@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Helpers\PaginatedResponse;
 use App\Http\Requests\Post\PostStoreRequest;
 use App\Http\Requests\Post\PostUpdateRequest;
 use App\Http\Resources\PostResource;
@@ -23,10 +24,12 @@ class PostController extends ApiController
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->get('per_page', 15);
-        $posts = $this->postService->list($perPage);
+        $categoryId = $request->get('category_id');
+
+        $posts = $this->postService->listActive($perPage, $categoryId);
 
         return $this->success(
-            PostResource::collection($posts),
+            PaginatedResponse::makeWithLinks(PostResource::collection($posts)),
             'Posts retrieved successfully'
         );
     }

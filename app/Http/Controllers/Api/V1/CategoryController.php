@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Helpers\PaginatedResponse;
 use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ class CategoryController extends ApiController
         $categories = $this->categoryService->listActive($perPage);
 
         return $this->success(
-            CategoryResource::collection($categories),
+            PaginatedResponse::makeWithLinks(CategoryResource::collection($categories)),
             'Categories retrieved successfully'
         );
     }

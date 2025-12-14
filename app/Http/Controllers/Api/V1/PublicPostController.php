@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Helpers\PaginatedResponse;
 use App\Http\Resources\PostResource;
 use App\Services\PostService;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ class PublicPostController extends ApiController
         $posts = $this->postService->listActive($perPage, $categoryId);
 
         return $this->success(
-            PostResource::collection($posts),
+            PaginatedResponse::makeWithLinks(PostResource::collection($posts)),
             'Posts retrieved successfully'
         );
     }

@@ -39,6 +39,23 @@ class ProductService extends BaseService
         return $this->products->getFeatured($limit);
     }
 
+    public function getRelated(Product $product, int $limit = 8)
+    {
+        $categoryIds = $product->categories->pluck('id')->toArray();
+
+        if (empty($categoryIds)) {
+            return collect();
+        }
+
+        return Product::with('categories')
+            ->where('active', true)
+            ->where('id', '!=', $product->id)
+            ->whereHas('categories', fn ($q) => $q->whereIn('product_categories.id', $categoryIds))
+            ->orderBy('order')
+            ->limit($limit)
+            ->get();
+    }
+
     public function create(array $data): Product
     {
         $data['slug'] ??= Str::slug($data['name']);

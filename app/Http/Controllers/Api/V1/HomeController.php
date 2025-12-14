@@ -90,6 +90,10 @@ class HomeController extends Controller
     {
         $config = $this->transformImagePaths($config);
 
+        if ($type === HomeComponentType::ProductCategories->value) {
+            $config = $this->transformProductCategories($config);
+        }
+
         if ($type === HomeComponentType::FeaturedProducts->value) {
             $config = $this->transformFeaturedProducts($config);
         }
@@ -97,6 +101,53 @@ class HomeController extends Controller
         if ($type === HomeComponentType::News->value) {
             $config = $this->transformNews($config);
         }
+
+        return $config;
+    }
+
+    protected function transformProductCategories(array $config): array
+    {
+        if (empty($config['categories'])) {
+            return $config;
+        }
+
+        // Lấy tất cả category_ids cần query
+        $categoryIds = collect($config['categories'])
+            ->where('link_type', 'category')
+            ->pluck('category_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Query một lần để lấy tất cả slugs
+        $categorySlugs = [];
+        if (!empty($categoryIds)) {
+            $categorySlugs = \App\Models\ProductCategory::query()
+                ->whereIn('id', $categoryIds)
+                ->pluck('slug', 'id')
+                ->toArray();
+        }
+
+        // Transform categories với link đúng
+        $config['categories'] = array_map(function ($category) use ($categorySlugs) {
+            $linkType = $category['link_type'] ?? 'custom';
+
+            if ($linkType === 'category' && !empty($category['category_id'])) {
+                $slug = $categorySlugs[$category['category_id']] ?? null;
+                $category['link'] = $slug ? '/san-pham?category=' . $slug : '#';
+            }
+
+            // Đảm bảo luôn có link
+            if (empty($category['link'])) {
+                $category['link'] = '#';
+            }
+
+            // Cleanup: không cần trả về link_type và category_id cho frontend
+            unset($category['link_type'], $category['category_id']);
+
+            return $category;
+        }, $config['categories']);
 
         return $config;
     }
@@ -116,7 +167,7 @@ class HomeController extends Controller
                     'image' => $product->thumbnail ? asset('storage/' . $product->thumbnail) : null,
                     'name' => $product->name,
                     'price' => $product->price ? number_format($product->price, 0, ',', '.') . ' đ' : 'Liên hệ',
-                    'link' => '/products/' . $product->slug,
+                    'link' => '/san-pham/' . $product->slug,
                 ])
                 ->toArray();
 
@@ -140,7 +191,7 @@ class HomeController extends Controller
                 ->map(fn (Post $post) => [
                     'image' => $post->thumbnail ? asset('storage/' . $post->thumbnail) : null,
                     'title' => $post->title,
-                    'link' => '/news/' . $post->slug,
+                    'link' => '/bai-viet/' . $post->slug,
                 ])
                 ->toArray();
 

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\HomeComponent;
+use App\Services\NextJsRevalidationService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Enums\ImageDriver;
@@ -13,6 +14,10 @@ class HomeComponentObserver
     protected array $imageFields = ['image', 'logo', 'avatar', 'thumbnail'];
 
     protected array $convertibleExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+    public function __construct(
+        protected NextJsRevalidationService $revalidationService
+    ) {}
 
     public function saving(HomeComponent $component): void
     {
@@ -27,18 +32,33 @@ class HomeComponentObserver
     public function saved(HomeComponent $component): void
     {
         $this->clearCache($component);
+        $this->triggerRevalidation($component);
     }
 
     public function deleted(HomeComponent $component): void
     {
         $this->clearCache($component);
+        $this->triggerRevalidation($component);
         $this->deleteAllImages($component);
     }
 
     protected function clearCache(HomeComponent $component): void
     {
-        Cache::forget('home-components');
-        Cache::forget("home-component-{$component->type}");
+        // Clear tất cả cache liên quan đến home page
+        Cache::forget('home-page-data');      // HomeController single endpoint
+        Cache::forget('home-components');      // HomeComponentController list
+        Cache::forget("home-component-{$component->type}"); // HomeComponentController single
+    }
+
+    /**
+     * Trigger Next.js revalidation để refresh cache
+     */
+    protected function triggerRevalidation(HomeComponent $component): void
+    {
+        // Chạy revalidation trong background để không block request
+        dispatch(function () {
+            app(NextJsRevalidationService::class)->revalidateHome();
+        })->afterResponse();
     }
 
     protected function processImages(HomeComponent $component): void
@@ -156,3 +176,4 @@ class HomeComponentObserver
         }
     }
 }
+

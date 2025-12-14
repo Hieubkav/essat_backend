@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Helpers\PaginatedResponse;
 use App\Http\Resources\ProductResource;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ class ProductController extends ApiController
         $products = $this->productService->listActive($perPage, $categoryId);
 
         return $this->success(
-            ProductResource::collection($products),
+            PaginatedResponse::makeWithLinks(ProductResource::collection($products)),
             'Products retrieved successfully'
         );
     }
@@ -36,9 +37,10 @@ class ProductController extends ApiController
         }
 
         $product->load('categories');
+        $relatedProducts = $this->productService->getRelated($product, 8);
 
         return $this->success(
-            new ProductResource($product),
+            (new ProductResource($product))->withRelated($relatedProducts),
             'Product retrieved successfully'
         );
     }
