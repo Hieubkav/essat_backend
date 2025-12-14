@@ -3,11 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MenuResource\Pages;
+use App\Models\Category;
 use App\Models\Menu;
+use App\Models\Post;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -60,7 +67,53 @@ class MenuResource extends Resource
                             ->label('Đường dẫn (URL)')
                             ->maxLength(255)
                             ->placeholder('VD: /san-pham, /lien-he')
-                            ->helperText('Để trống = trang chủ (/). Nếu là menu cha dropdown thì nhập #'),
+                            ->helperText('Để trống = trang chủ (/). Nếu là menu cha dropdown thì nhập #')
+                            ->suffixAction(
+                                Action::make('quickLink')
+                                    ->icon('heroicon-o-link')
+                                    ->tooltip('Chọn nhanh từ nội dung')
+                                    ->form([
+                                        Select::make('link_type')
+                                            ->label('Loại liên kết')
+                                            ->options([
+                                                'post' => 'Bài viết',
+                                                'post_category' => 'Danh mục bài viết',
+                                                'product' => 'Sản phẩm',
+                                                'product_category' => 'Danh mục sản phẩm',
+                                            ])
+                                            ->required()
+                                            ->live(),
+
+                                        Select::make('link_value')
+                                            ->label('Chọn nội dung')
+                                            ->options(function (Get $get) {
+                                                return match ($get('link_type')) {
+                                                    'post' => Post::where('active', true)->orderBy('title')->pluck('title', 'slug'),
+                                                    'post_category' => Category::where('active', true)->orderBy('name')->pluck('name', 'slug'),
+                                                    'product' => Product::where('active', true)->orderBy('name')->pluck('name', 'slug'),
+                                                    'product_category' => ProductCategory::where('active', true)->orderBy('name')->pluck('name', 'slug'),
+                                                    default => [],
+                                                };
+                                            })
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->visible(fn (Get $get) => filled($get('link_type'))),
+                                    ])
+                                    ->action(function (array $data, Set $set) {
+                                        $url = match ($data['link_type']) {
+                                            'post' => "/bai-viet/{$data['link_value']}",
+                                            'post_category' => "/bai-viet?category={$data['link_value']}",
+                                            'product' => "/san-pham/{$data['link_value']}",
+                                            'product_category' => "/san-pham?category={$data['link_value']}",
+                                            default => null,
+                                        };
+                                        $set('url', $url);
+                                    })
+                                    ->modalHeading('Chọn nhanh liên kết')
+                                    ->modalSubmitActionLabel('Áp dụng')
+                                    ->modalWidth('md')
+                            ),
 
                         Select::make('parent_id')
                             ->label('Menu cha')

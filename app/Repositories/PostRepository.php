@@ -43,4 +43,18 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->limit($limit)
             ->get();
     }
+
+    /**
+     * Get related posts by category (exclude current post).
+     */
+    public function getRelatedByCategory(int $categoryId, int $excludePostId, int $limit = 6)
+    {
+        return $this->model
+            ->where('active', true)
+            ->where('category_id', $categoryId)
+            ->where('id', '!=', $excludePostId)
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
 }

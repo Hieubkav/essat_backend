@@ -48,6 +48,7 @@ class ProductResource extends BaseResource
                 'slug' => $p->slug,
                 'thumbnail' => $p->thumbnail ? Storage::disk('public')->url($p->thumbnail) : null,
                 'price' => $p->price,
+                'category' => $p->categories->first()?->name,
             ]);
         }
 

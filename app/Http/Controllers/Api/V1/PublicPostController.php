@@ -38,10 +38,13 @@ class PublicPostController extends ApiController
 
         $post->load('category');
 
-        return $this->success(
-            new PostResource($post),
-            'Post retrieved successfully'
-        );
+        $relatedPosts = $this->postService->getRelatedPosts($post, 6);
+        $relatedPosts->load('category');
+
+        return $this->success([
+            'post' => new PostResource($post),
+            'related_posts' => PostResource::collection($relatedPosts),
+        ], 'Post retrieved successfully');
     }
 
     public function latest(Request $request): JsonResponse

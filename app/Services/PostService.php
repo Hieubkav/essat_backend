@@ -48,6 +48,18 @@ class PostService extends BaseService
     }
 
     /**
+     * Get related posts by category.
+     */
+    public function getRelatedPosts(Post $post, int $limit = 6)
+    {
+        if (!$post->category_id) {
+            return collect();
+        }
+
+        return $this->posts->getRelatedByCategory($post->category_id, $post->id, $limit);
+    }
+
+    /**
      * Create a new post.
      */
     public function create(array $data): Post
