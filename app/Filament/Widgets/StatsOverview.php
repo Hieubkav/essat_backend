@@ -16,7 +16,7 @@ class StatsOverview extends BaseWidget
     {
         return [
             Stat::make('Tổng người dùng', User::count())
-                ->description('Tài khoản đã đăng ký')
+                ->description('người dùng')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary')
                 ->chart([7, 3, 4, 5, 6, 3, 5, 8]),

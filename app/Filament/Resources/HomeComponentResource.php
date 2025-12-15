@@ -5,7 +5,10 @@ namespace App\Filament\Resources;
 use App\Enums\HomeComponentType;
 use App\Filament\Resources\HomeComponentResource\Pages;
 use App\Models\HomeComponent;
+use App\Models\Post;
+use App\Models\Product;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -15,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -424,7 +428,35 @@ class HomeComponentResource extends Resource
 
                     TextInput::make('name')
                         ->label('Tên sản phẩm')
-                        ->required(),
+                        ->required()
+                        ->suffixAction(
+                            Action::make('selectProduct')
+                                ->icon('heroicon-o-cube')
+                                ->tooltip('Chọn nhanh từ sản phẩm')
+                                ->form([
+                                    Select::make('product_id')
+                                        ->label('Chọn sản phẩm')
+                                        ->options(fn () => Product::where('active', true)
+                                            ->orderBy('created_at', 'desc')
+                                            ->pluck('name', 'id')
+                                        )
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                ])
+                                ->action(function (array $data, Set $set) {
+                                    $product = Product::find($data['product_id']);
+                                    if ($product) {
+                                        $set('name', $product->name);
+                                        $set('link', '/san-pham/' . $product->slug);
+                                        $set('image', $product->thumbnail);
+                                        $set('price', $product->price ? number_format($product->price, 0, ',', '.') . ' đ' : 'Liên hệ');
+                                    }
+                                })
+                                ->modalHeading('Chọn sản phẩm')
+                                ->modalSubmitActionLabel('Áp dụng')
+                                ->modalWidth('md')
+                        ),
 
                     TextInput::make('price')
                         ->label('Giá')
@@ -521,7 +553,34 @@ class HomeComponentResource extends Resource
 
                     TextInput::make('title')
                         ->label('Tiêu đề')
-                        ->required(),
+                        ->required()
+                        ->suffixAction(
+                            Action::make('selectPost')
+                                ->icon('heroicon-o-document-text')
+                                ->tooltip('Chọn nhanh từ bài viết')
+                                ->form([
+                                    Select::make('post_id')
+                                        ->label('Chọn bài viết')
+                                        ->options(fn () => Post::where('active', true)
+                                            ->orderBy('created_at', 'desc')
+                                            ->pluck('title', 'id')
+                                        )
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                ])
+                                ->action(function (array $data, Set $set) {
+                                    $post = Post::find($data['post_id']);
+                                    if ($post) {
+                                        $set('title', $post->title);
+                                        $set('link', '/bai-viet/' . $post->slug);
+                                        $set('image', $post->thumbnail);
+                                    }
+                                })
+                                ->modalHeading('Chọn bài viết')
+                                ->modalSubmitActionLabel('Áp dụng')
+                                ->modalWidth('md')
+                        ),
 
                     TextInput::make('link')
                         ->label('Link đến'),
