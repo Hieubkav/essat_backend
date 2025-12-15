@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\HomeComponentType;
+use App\Helpers\PlaceholderHelper;
 use App\Http\Controllers\Controller;
 use App\Models\HomeComponent;
 use App\Models\Post;
@@ -40,7 +41,7 @@ class HomeComponentController extends Controller
                 ->first();
         });
 
-        if (!$component) {
+        if (! $component) {
             return response()->json([
                 'success' => false,
                 'message' => 'Component not found',
@@ -92,7 +93,7 @@ class HomeComponentController extends Controller
 
         // Query một lần để lấy tất cả slugs
         $categorySlugs = [];
-        if (!empty($categoryIds)) {
+        if (! empty($categoryIds)) {
             $categorySlugs = \App\Models\ProductCategory::query()
                 ->whereIn('id', $categoryIds)
                 ->pluck('slug', 'id')
@@ -103,9 +104,9 @@ class HomeComponentController extends Controller
         $config['categories'] = array_map(function ($category) use ($categorySlugs) {
             $linkType = $category['link_type'] ?? 'custom';
 
-            if ($linkType === 'category' && !empty($category['category_id'])) {
+            if ($linkType === 'category' && ! empty($category['category_id'])) {
                 $slug = $categorySlugs[$category['category_id']] ?? null;
-                $category['link'] = $slug ? '/san-pham?category=' . $slug : '#';
+                $category['link'] = $slug ? '/san-pham?category='.$slug : '#';
             }
 
             // Đảm bảo luôn có link
@@ -134,10 +135,12 @@ class HomeComponentController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(fn (Product $product) => [
-                    'image' => $product->thumbnail ? asset('storage/' . $product->thumbnail) : null,
+                    'image' => $product->thumbnail
+                        ? asset('storage/'.$product->thumbnail)
+                        : PlaceholderHelper::getUrl(),
                     'name' => $product->name,
-                    'price' => $product->price ? number_format($product->price, 0, ',', '.') . ' đ' : 'Liên hệ',
-                    'link' => '/san-pham/' . $product->slug,
+                    'price' => $product->price ? number_format($product->price, 0, ',', '.').' đ' : 'Liên hệ',
+                    'link' => '/san-pham/'.$product->slug,
                 ])
                 ->toArray();
 
@@ -159,9 +162,9 @@ class HomeComponentController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(fn (Post $post) => [
-                    'image' => $post->thumbnail ? asset('storage/' . $post->thumbnail) : null,
+                    'image' => $post->thumbnail ? asset('storage/'.$post->thumbnail) : null,
                     'title' => $post->title,
-                    'link' => '/bai-viet/' . $post->slug,
+                    'link' => '/bai-viet/'.$post->slug,
                 ])
                 ->toArray();
 
@@ -178,10 +181,10 @@ class HomeComponentController extends Controller
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $data[$key] = $this->transformImagePaths($value);
-            } elseif (in_array($key, $imageFields) && is_string($value) && !empty($value)) {
+            } elseif (in_array($key, $imageFields) && is_string($value) && ! empty($value)) {
                 // Chỉ transform nếu là local path (không phải URL đầy đủ)
-                if (!str_starts_with($value, 'http://') && !str_starts_with($value, 'https://')) {
-                    $data[$key] = asset('storage/' . $value);
+                if (! str_starts_with($value, 'http://') && ! str_starts_with($value, 'https://')) {
+                    $data[$key] = asset('storage/'.$value);
                 }
             }
         }

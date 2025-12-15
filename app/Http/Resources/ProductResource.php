@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\PlaceholderHelper;
 use App\Http\Resources\Concerns\HasHypermediaLinks;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +20,7 @@ class ProductResource extends BaseResource
     public function withRelated($products): self
     {
         $this->relatedProducts = $products;
+
         return $this;
     }
 
@@ -30,7 +32,9 @@ class ProductResource extends BaseResource
             'slug' => $this->slug,
             'description' => $this->description,
             'content' => $this->content,
-            'thumbnail' => $this->thumbnail ? Storage::disk('public')->url($this->thumbnail) : null,
+            'thumbnail' => $this->thumbnail
+                ? Storage::disk('public')->url($this->thumbnail)
+                : PlaceholderHelper::getUrl(),
             'price' => $this->price,
             'active' => $this->active,
             'order' => $this->order,
@@ -46,7 +50,9 @@ class ProductResource extends BaseResource
                 'id' => $p->id,
                 'name' => $p->name,
                 'slug' => $p->slug,
-                'thumbnail' => $p->thumbnail ? Storage::disk('public')->url($p->thumbnail) : null,
+                'thumbnail' => $p->thumbnail
+                    ? Storage::disk('public')->url($p->thumbnail)
+                    : PlaceholderHelper::getUrl(),
                 'price' => $p->price,
                 'category' => $p->categories->first()?->name,
             ]);
@@ -67,7 +73,7 @@ class ProductResource extends BaseResource
     {
         return [
             'categories' => [
-                'href' => $this->baseUrl() . '/product-categories?product_id=' . $this->id,
+                'href' => $this->baseUrl().'/product-categories?product_id='.$this->id,
             ],
         ];
     }

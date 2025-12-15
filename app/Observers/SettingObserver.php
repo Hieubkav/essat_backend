@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Helpers\PlaceholderHelper;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,6 +19,13 @@ class SettingObserver
             if ($oldPath && $oldPath !== $newPath) {
                 Storage::disk('public')->delete($oldPath);
             }
+        }
+    }
+
+    public function updated(Setting $setting): void
+    {
+        if ($setting->wasChanged('placeholder')) {
+            PlaceholderHelper::clearCache();
         }
     }
 

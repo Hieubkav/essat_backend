@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\HomeComponentType;
+use App\Helpers\PlaceholderHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SettingResource;
 use App\Models\HomeComponent;
@@ -15,9 +16,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
-    public function __construct(private SettingService $settingService)
-    {
-    }
+    public function __construct(private SettingService $settingService) {}
 
     /**
      * Single endpoint trả về tất cả data cho trang chủ.
@@ -42,6 +41,7 @@ class HomeController extends Controller
     protected function getSettings(): array
     {
         $setting = $this->settingService->get();
+
         return (new SettingResource($setting))->resolve();
     }
 
@@ -122,7 +122,7 @@ class HomeController extends Controller
 
         // Query một lần để lấy tất cả slugs
         $categorySlugs = [];
-        if (!empty($categoryIds)) {
+        if (! empty($categoryIds)) {
             $categorySlugs = \App\Models\ProductCategory::query()
                 ->whereIn('id', $categoryIds)
                 ->pluck('slug', 'id')
@@ -133,9 +133,9 @@ class HomeController extends Controller
         $config['categories'] = array_map(function ($category) use ($categorySlugs) {
             $linkType = $category['link_type'] ?? 'custom';
 
-            if ($linkType === 'category' && !empty($category['category_id'])) {
+            if ($linkType === 'category' && ! empty($category['category_id'])) {
                 $slug = $categorySlugs[$category['category_id']] ?? null;
-                $category['link'] = $slug ? '/san-pham?category=' . $slug : '#';
+                $category['link'] = $slug ? '/san-pham?category='.$slug : '#';
             }
 
             // Đảm bảo luôn có link
@@ -164,10 +164,12 @@ class HomeController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(fn (Product $product) => [
-                    'image' => $product->thumbnail ? asset('storage/' . $product->thumbnail) : null,
+                    'image' => $product->thumbnail
+                        ? asset('storage/'.$product->thumbnail)
+                        : PlaceholderHelper::getUrl(),
                     'name' => $product->name,
-                    'price' => $product->price ? number_format($product->price, 0, ',', '.') . ' đ' : 'Liên hệ',
-                    'link' => '/san-pham/' . $product->slug,
+                    'price' => $product->price ? number_format($product->price, 0, ',', '.').' đ' : 'Liên hệ',
+                    'link' => '/san-pham/'.$product->slug,
                 ])
                 ->toArray();
 
@@ -189,9 +191,9 @@ class HomeController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(fn (Post $post) => [
-                    'image' => $post->thumbnail ? asset('storage/' . $post->thumbnail) : null,
+                    'image' => $post->thumbnail ? asset('storage/'.$post->thumbnail) : null,
                     'title' => $post->title,
-                    'link' => '/bai-viet/' . $post->slug,
+                    'link' => '/bai-viet/'.$post->slug,
                 ])
                 ->toArray();
 
@@ -208,9 +210,9 @@ class HomeController extends Controller
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $data[$key] = $this->transformImagePaths($value);
-            } elseif (in_array($key, $imageFields) && is_string($value) && !empty($value)) {
-                if (!str_starts_with($value, 'http://') && !str_starts_with($value, 'https://')) {
-                    $data[$key] = asset('storage/' . $value);
+            } elseif (in_array($key, $imageFields) && is_string($value) && ! empty($value)) {
+                if (! str_starts_with($value, 'http://') && ! str_starts_with($value, 'https://')) {
+                    $data[$key] = asset('storage/'.$value);
                 }
             }
         }
