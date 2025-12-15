@@ -69,4 +69,13 @@ class User extends Authenticatable implements HasMedia, FilamentUser
     {
         return $this->role === 'user';
     }
+
+    /**
+     * Cho phép tất cả user đã đăng nhập truy cập panel
+     * Phân quyền chi tiết do Filament Shield xử lý ở từng Resource
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
 }
