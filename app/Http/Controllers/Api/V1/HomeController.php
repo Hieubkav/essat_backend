@@ -76,14 +76,17 @@ class HomeController extends Controller
 
     protected function getComponents(): array
     {
-        return HomeComponent::query()
+        $components = HomeComponent::query()
             ->where('active', true)
             ->orderBy('order', 'asc')
-            ->get()
-            ->mapWithKeys(fn ($item) => [
+            ->get();
+
+        return [
+            'order' => $components->pluck('type')->toArray(),
+            'data' => $components->mapWithKeys(fn ($item) => [
                 $item->type => $this->transformConfig($item->type, $item->config ?? []),
-            ])
-            ->toArray();
+            ])->toArray(),
+        ];
     }
 
     protected function transformConfig(string $type, array $config): array
