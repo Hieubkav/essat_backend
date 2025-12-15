@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,12 +11,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\Permission\Traits\HasRoles;
 use App\Traits\HasMediaCollections;
 
 class User extends Authenticatable implements HasMedia, FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasMediaCollections;
+    use HasFactory, Notifiable, HasApiTokens, HasMediaCollections, HasRoles, HasPanelShield;
 
     /**
      * The attributes that are mass assignable.
@@ -66,13 +68,5 @@ class User extends Authenticatable implements HasMedia, FilamentUser
     public function isUser(): bool
     {
         return $this->role === 'user';
-    }
-
-    /**
-     * Determine if user can access Filament panel
-     */
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->isAdmin();
     }
 }

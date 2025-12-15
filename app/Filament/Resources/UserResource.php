@@ -86,7 +86,7 @@ class UserResource extends Resource
                 Section::make('Phân quyền')
                     ->schema([
                         Forms\Components\Select::make('role')
-                            ->label('Vai trò')
+                            ->label('Loại tài khoản')
                             ->options([
                                 'admin' => 'Quản trị viên',
                                 'user' => 'Người dùng',
@@ -94,7 +94,16 @@ class UserResource extends Resource
                             ->required()
                             ->default('user')
                             ->native(false),
-                    ]),
+
+                        Forms\Components\Select::make('roles')
+                            ->label('Vai trò phân quyền')
+                            ->relationship('roles', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->helperText('Chọn vai trò để phân quyền truy cập admin panel'),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -113,7 +122,7 @@ class UserResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('role')
-                    ->label('Vai trò')
+                    ->label('Loại TK')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
@@ -126,6 +135,14 @@ class UserResource extends Resource
                         default => $state,
                     })
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Vai trò')
+                    ->badge()
+                    ->color('success')
+                    ->separator(', ')
+                    ->limitList(2)
+                    ->expandableLimitedList(),
 
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Xác thực')
